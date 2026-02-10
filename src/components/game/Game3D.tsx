@@ -51,7 +51,7 @@ export function Game3D() {
           resolution={256} 
           color="#1e293b" 
         />
-        <Environment preset="city" />
+        <Environment preset="soft" />
       </Canvas>
     </div>
   );

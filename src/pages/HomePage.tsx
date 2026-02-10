@@ -1,138 +1,113 @@
-// Home page of the app.
-// Currently a demo placeholder "please wait" screen.
-// Replace this file with your actual app UI. Do not delete it to use some other file as homepage. Simply replace the entire contents of this file.
-
-import { useEffect, useMemo, useState } from 'react'
-import { Sparkles } from 'lucide-react'
-
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { HAS_TEMPLATE_DEMO, TemplateDemo } from '@/components/TemplateDemo'
-import { Button } from '@/components/ui/button'
-import { Toaster, toast } from '@/components/ui/sonner'
-
-function formatDuration(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
+import React, { useEffect } from 'react';
+import { Game3D } from '@/components/game/Game3D';
+import { MobileControls } from '@/components/game/MobileControls';
+import { useGameStore } from '@/store/useGameStore';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Trophy, Play, RotateCcw, Pause, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 export function HomePage() {
-  const [coins, setCoins] = useState(0)
-  const [isRunning, setIsRunning] = useState(false)
-  const [startedAt, setStartedAt] = useState<number | null>(null)
-  const [elapsedMs, setElapsedMs] = useState(0)
-
+  const status = useGameStore(s => s.status);
+  const score = useGameStore(s => s.score);
+  const startGame = useGameStore(s => s.startGame);
+  const resetGame = useGameStore(s => s.resetGame);
+  const pauseGame = useGameStore(s => s.pauseGame);
+  const resumeGame = useGameStore(s => s.resumeGame);
+  const setDirection = useGameStore(s => s.setDirection);
   useEffect(() => {
-    if (!isRunning || startedAt === null) return
-
-    const t = setInterval(() => {
-      setElapsedMs(Date.now() - startedAt)
-    }, 250)
-
-    return () => clearInterval(t)
-  }, [isRunning, startedAt])
-
-  const formatted = useMemo(() => formatDuration(elapsedMs), [elapsedMs])
-
-  const onPleaseWait = () => {
-    setCoins((c) => c + 1)
-
-    if (!isRunning) {
-      // Resume from the current elapsed time
-      setStartedAt(Date.now() - elapsedMs)
-      setIsRunning(true)
-      toast.success('Building your app…', {
-        description: "Hang tight — we're setting everything up.",
-      })
-      return
-    }
-
-    setIsRunning(false)
-    toast.info('Still working…', {
-      description: 'You can come back in a moment.',
-    })
-  }
-
-  const onReset = () => {
-    setCoins(0)
-    setIsRunning(false)
-    setStartedAt(null)
-    setElapsedMs(0)
-    toast('Reset complete')
-  }
-
-  const onAddCoin = () => {
-    setCoins((c) => c + 1)
-    toast('Coin added')
-  }
-
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+          setDirection([0, -1]);
+          break;
+        case 'ArrowDown':
+        case 's':
+          setDirection([0, 1]);
+          break;
+        case 'ArrowLeft':
+        case 'a':
+          setDirection([-1, 0]);
+          break;
+        case 'ArrowRight':
+        case 'd':
+          setDirection([1, 0]);
+          break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setDirection]);
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4 overflow-hidden relative">
-      <ThemeToggle />
-      <div className="absolute inset-0 bg-gradient-rainbow opacity-10 dark:opacity-20 pointer-events-none" />
-
-      <div className="text-center space-y-8 relative z-10 animate-fade-in w-full">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary floating">
-            <Sparkles className="w-8 h-8 text-white rotating" />
-          </div>
+    <div className="relative w-full h-screen overflow-hidden font-sans select-none">
+      <Game3D />
+      {/* HUD */}
+      <div className="absolute top-6 left-6 z-10">
+        <div className="bg-white/80 backdrop-blur-md rounded-2xl px-6 py-3 border-4 border-blue-400 shadow-lg flex items-center gap-3">
+          <Trophy className="w-6 h-6 text-yellow-500 fill-yellow-500" />
+          <span className="text-2xl font-black text-blue-900 tabular-nums">{score}</span>
         </div>
-
-        <div className="space-y-3">
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-balance leading-tight">
-            Creating your <span className="text-gradient">app</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto text-pretty">
-            Your application would be ready soon.
-          </p>
-        </div>
-
-        {HAS_TEMPLATE_DEMO ? (
-          <div className="max-w-5xl mx-auto text-left">
-            <TemplateDemo />
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={onPleaseWait}
-                className="btn-gradient px-8 py-4 text-lg font-semibold hover:-translate-y-0.5 transition-all duration-200"
-                aria-live="polite"
-              >
-                Please Wait
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div>
-                Time elapsed:{' '}
-                <span className="font-medium tabular-nums text-foreground">{formatted}</span>
-              </div>
-              <div>
-                Coins:{' '}
-                <span className="font-medium tabular-nums text-foreground">{coins}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={onReset}>
-                Reset
-              </Button>
-              <Button variant="outline" size="sm" onClick={onAddCoin}>
-                Add Coin
-              </Button>
-            </div>
-          </>
-        )}
       </div>
-
-      <footer className="absolute bottom-8 text-center text-muted-foreground/80">
-        <p>Powered by Cloudflare</p>
-      </footer>
-
-      <Toaster richColors closeButton />
+      <div className="absolute top-6 right-6 z-10 flex gap-2">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="rounded-xl border-4 border-blue-400 bg-white/80 h-12 w-12"
+          onClick={() => status === 'RUNNING' ? pauseGame() : resumeGame()}
+        >
+          {status === 'PAUSED' ? <Play className="fill-blue-500 text-blue-500" /> : <Pause className="fill-blue-500 text-blue-500" />}
+        </Button>
+      </div>
+      <MobileControls />
+      {/* Overlays */}
+      <AnimatePresence>
+        {status === 'IDLE' && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute inset-0 flex items-center justify-center bg-blue-400/20 backdrop-blur-sm z-20"
+          >
+            <Card className="p-10 text-center border-8 border-white bg-blue-500 rounded-[3rem] shadow-2xl space-y-6">
+              <div className="flex justify-center">
+                <div className="bg-white p-4 rounded-3xl rotate-3 shadow-xl">
+                  <Sparkles className="w-12 h-12 text-blue-500" />
+                </div>
+              </div>
+              <h1 className="text-6xl font-black text-white drop-shadow-lg">SNAKEY 3D</h1>
+              <p className="text-blue-100 font-bold text-lg">Eat fruits and grow big!</p>
+              <Button 
+                onClick={startGame}
+                className="bg-orange-400 hover:bg-orange-500 text-white font-black text-2xl px-12 py-8 rounded-full border-b-8 border-orange-600 active:translate-y-1 active:border-b-4 transition-all"
+              >
+                LET'S PLAY!
+              </Button>
+            </Card>
+          </motion.div>
+        )}
+        {status === 'GAMEOVER' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute inset-0 flex items-center justify-center bg-red-400/20 backdrop-blur-sm z-20"
+          >
+            <Card className="p-10 text-center border-8 border-white bg-red-500 rounded-[3rem] shadow-2xl space-y-6">
+              <h2 className="text-5xl font-black text-white drop-shadow-lg">GAME OVER!</h2>
+              <div className="bg-white/20 p-6 rounded-2xl">
+                <p className="text-red-100 font-bold">Final Score</p>
+                <p className="text-6xl font-black text-white tabular-nums">{score}</p>
+              </div>
+              <Button 
+                onClick={resetGame}
+                className="bg-blue-400 hover:bg-blue-500 text-white font-black text-2xl px-12 py-8 rounded-full border-b-8 border-blue-600 active:translate-y-1 active:border-b-4 transition-all flex items-center gap-3"
+              >
+                <RotateCcw className="w-8 h-8" />
+                TRY AGAIN
+              </Button>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  )
+  );
 }
