@@ -1,6 +1,6 @@
 # Snakey 3D World
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/seatayu/snakey-3d)
 
 A modern full-stack web application built with React, Tailwind CSS, and shadcn/ui, powered by Cloudflare Workers for seamless edge deployment. Features a responsive UI with dark mode, sidebar navigation, and API routes handled via Hono.
 
@@ -123,7 +123,7 @@ This builds assets and deploys via Wrangler.
 3. Configure custom domain (optional):
    Update `wrangler.jsonc` and run `wrangler deploy`.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/seatayu/snakey-3d)
 
 **Note**: SPA assets are served from `/` with API routes at `/api/*`. Worker handles both.
 
