@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Game3D } from '@/components/game/Game3D';
 import { MobileControls } from '@/components/game/MobileControls';
+import { ActivePowerUpsDisplay } from '@/components/game/ActivePowerUpsDisplay';
 import { useGameStore } from '@/store/useGameStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -48,6 +49,7 @@ export function HomePage() {
           <span className="text-2xl font-black text-blue-900 tabular-nums">{score}</span>
         </div>
       </div>
+      <ActivePowerUpsDisplay />
       <div className="absolute top-6 right-6 z-10 flex gap-2">
         <Button 
           variant="outline" 

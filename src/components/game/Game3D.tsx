@@ -1,23 +1,41 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
 import { useGameStore } from '@/store/useGameStore';
 import { Snake } from './Snake';
 import { Food } from './Food';
+import { PowerUps } from './PowerUps';
 import { Board } from './Board';
+
 function GameLoop() {
   const tick = useGameStore(s => s.tick);
   const status = useGameStore(s => s.status);
   const speed = useGameStore(s => s.speed);
+  const updatePowerUpEffects = useGameStore(s => s.updatePowerUpEffects);
+  const removeExpiredPowerUps = useGameStore(s => s.removeExpiredPowerUps);
   const lastTick = useRef(0);
+  const lastPowerUpCheck = useRef(0);
+
   useFrame((state) => {
     if (status !== 'RUNNING') return;
+
     const now = state.clock.getElapsedTime() * 1000;
+
+    // Game tick
     if (now - lastTick.current > speed) {
       tick();
       lastTick.current = now;
     }
+
+    // Check power-up effects every 100ms
+    if (now - lastPowerUpCheck.current > 100) {
+      const currentTime = Date.now();
+      updatePowerUpEffects(currentTime);
+      removeExpiredPowerUps(currentTime);
+      lastPowerUpCheck.current = now;
+    }
   });
+
   return null;
 }
 export function Game3D() {
@@ -43,6 +61,7 @@ export function Game3D() {
         <Board />
         <Snake />
         <Food />
+        <PowerUps />
         <ContactShadows 
           opacity={0.4} 
           scale={20} 
